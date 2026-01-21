@@ -59,13 +59,13 @@ public class TaskController {
         return ResponseEntity.ok(updated);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Task> deleteTask(
+    @DeleteMapping("/{id}/done")
+    public ResponseEntity<Void> deleteTask(
             @PathVariable("id") Long id
     ){
         log.info("Called deleteTask: id={}", id);
         try{
-            taskService.deleteTask(id);
+            taskService.doneTask(id);
             return ResponseEntity.ok()
                     .build();
         }catch (NoSuchElementException e){

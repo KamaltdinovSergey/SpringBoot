@@ -1,39 +1,59 @@
 package com.example.SpringBoot.Service;
 
+import com.example.SpringBoot.Entity.TaskEntity;
+import com.example.SpringBoot.Repository.TaskRepository;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class TaskService {
+
+    private static Logger log = LoggerFactory.getLogger(TaskService.class);
 
     public final Map<Long, Task> tasksMap;
 
     //обычный лонг, который корректно работает в многопотоной среде
     private final AtomicLong idCounter;
 
-    public TaskService(){
+    private final TaskRepository taskRepository;
+
+    public TaskService(TaskRepository taskRepository){
+        this.taskRepository = taskRepository;
         tasksMap = new HashMap<>();
         idCounter =new AtomicLong();
     }
 
+    //получение задачи по id
     public Task getTaskById(
-            Long id) throws NoSuchFieldException {
-        if(!tasksMap.containsKey(id)){
-            throw new NoSuchFieldException("Not found" + id);
-        }
-        return tasksMap.get(id);
+            Long id
+    ) {
+        TaskEntity taskEntity = taskRepository.findById(id)
+                .orElseThrow(()-> new EntityNotFoundException(
+                        "Not found task by id = " + id
+                ));
+
+        return toDomainTask(taskEntity);
     }
 
+    //получение всех задач
     public List<Task> getAllTask(){
-        return tasksMap.values().stream().toList();
+        List<TaskEntity> allEntities = taskRepository.findAll();
+
+        List<Task> taskList = allEntities.stream()
+                .map(this::toDomainTask)
+                .toList();
+
+        return taskList;
     }
 
+    //создание задачи
     public Task createTask(Task taskToCreate) {
         if(taskToCreate.id() != null){
             throw new IllegalArgumentException("Id should be empty");
@@ -44,8 +64,8 @@ public class TaskService {
         if(taskToCreate.priority() != null){
             throw new IllegalArgumentException("Priority should be empty");
         }
-        var newTask = new Task(
-                idCounter.incrementAndGet(),
+        var entityToSave = new TaskEntity(
+                null,
                 taskToCreate.creatorId(),
                 taskToCreate.assignedUserId(),
                 Status.CREATED,
@@ -53,23 +73,24 @@ public class TaskService {
                 taskToCreate.deadlineDate(),
                 Priority.Low
         );
-        tasksMap.put(newTask.id(), newTask);
-        return newTask;
+        var savedEntity = taskRepository.save(entityToSave);
+        return toDomainTask(savedEntity);
     }
 
-    public Object updateTask(
+    //обновление задачи
+    public Task updateTask(
             Long id, Task taskToUpdate
     ) {
-        if(!tasksMap.containsKey(id)){
-            throw new NoSuchElementException("Not found task by id =" + id);
-        }
-        var task = tasksMap.get(id);
-        Task updateTask = null;
-        if (task.status() == Status.DONE){
-            throw new IllegalStateException("Cannot modify task " + task.status());
-        }else if(task.status() == Status.CREATED){
-            updateTask = new Task(
-                    task.id(),
+        var taskEntity = taskRepository.findById(id)
+                .orElseThrow(()-> new EntityNotFoundException("Not found task by id = " + id));
+
+        TaskEntity updateToTask = null;
+        TaskEntity taskToSave = null;
+        if (taskEntity.getStatus() == Status.DONE){
+            throw new IllegalStateException("Cannot modify task " + taskEntity.getStatus());
+        }else if(taskEntity.getStatus() == Status.CREATED){
+            updateToTask = new TaskEntity(
+                    taskEntity.getId(),
                     taskToUpdate.creatorId(),
                     taskToUpdate.assignedUserId(),
                     Status.CREATED,
@@ -77,10 +98,10 @@ public class TaskService {
                     taskToUpdate.deadlineDate(),
                     Priority.Low
             );
-            tasksMap.put(task.id(), updateTask);
-        } else if(task.status() == Status.IN_PROGRESS){
-            updateTask = new Task(
-                    task.id(),
+            taskToSave = taskRepository.save(updateToTask);
+        } else if(taskEntity.getStatus() == Status.IN_PROGRESS){
+            updateToTask = new TaskEntity(
+                    taskEntity.getId(),
                     taskToUpdate.creatorId(),
                     taskToUpdate.assignedUserId(),
                     Status.IN_PROGRESS,
@@ -88,58 +109,58 @@ public class TaskService {
                     taskToUpdate.deadlineDate(),
                     Priority.Low
             );
-            tasksMap.put(task.id(), updateTask);
+            taskToSave = taskRepository.save(updateToTask);
         }
-        return updateTask;
+        return toDomainTask(taskToSave);
     }
 
-    public void deleteTask(Long id) {
-        if(!tasksMap.containsKey(id)){
-            throw new NoSuchElementException("Not found task by id =" + id);
+    //удаление задачи
+    @Transactional
+    public void doneTask(Long id) {
+        if(!taskRepository.existsById(id)){
+            throw new EntityNotFoundException("Not found task by id = " + id);
         }
-        tasksMap.remove(id);
+        taskRepository.setStatus(id, Status.DONE);
+        log.info("Successfully cancelled task: id={}",id);
     }
 
-    public Object inProgressTask(Long id) {
-        if (!tasksMap.containsKey(id)) {
-            throw new NoSuchElementException("Not found task by id =" + id);
+    //перевод в статус прогресс
+    public Task inProgressTask(Long id) {
+        var taskEntity = taskRepository.findById(id)
+                .orElseThrow(()-> new EntityNotFoundException("Not found task by id = " + id));
+
+        if (taskEntity.getStatus() == Status.IN_PROGRESS) {
+            throw new IllegalStateException("Cannot progress task " + taskEntity.getStatus());
         }
-        var task = tasksMap.get(id);
-        if (task.status() == Status.IN_PROGRESS) {
-            throw new IllegalStateException("Cannot progress task " + task.status());
+
+        taskEntity.setStatus(Status.IN_PROGRESS);
+        taskRepository.save(taskEntity);
+        return toDomainTask(taskEntity);
+    }
+
+    //перевод в статус done
+    public Task inDoneTask(Long id) {
+        var taskEntity = taskRepository.findById(id)
+                .orElseThrow(()-> new EntityNotFoundException("Not found task by id = " + id));
+
+        if (taskEntity.getStatus() == Status.DONE) {
+            throw new IllegalStateException("Cannot done task " + taskEntity.getStatus());
         }
-        var progressTask = new Task(
-                task.id(),
-                task.creatorId(),
-                task.assignedUserId(),
-                Status.IN_PROGRESS,
-                task.createDate(),
-                task.deadlineDate(),
-                Priority.Low
+
+        taskEntity.setStatus(Status.DONE);
+        taskRepository.save(taskEntity);
+        return toDomainTask(taskEntity);
+    }
+
+    private Task toDomainTask(TaskEntity task){
+        return new Task(
+                task.getId(),
+                task.getCreatorId(),
+                task.getAssignedUserId(),
+                task.getStatus(),
+                task.getCreateDate(),
+                task.getDeadlineDate(),
+                task.getPriority()
         );
-        tasksMap.put(task.id(), progressTask);
-        return progressTask;
     }
-
-    public Object inDoneTask(Long id) {
-        if (!tasksMap.containsKey(id)) {
-            throw new NoSuchElementException("Not found task by id =" + id);
-        }
-        var task = tasksMap.get(id);
-        if (task.status() == Status.DONE) {
-            throw new IllegalStateException("Cannot done task " + task.status());
-        }
-        var doneTask = new Task(
-                task.id(),
-                task.creatorId(),
-                task.assignedUserId(),
-                Status.DONE,
-                task.createDate(),
-                task.deadlineDate(),
-                Priority.Low
-        );
-        tasksMap.put(task.id(), doneTask);
-        return doneTask;
-    }
-
 }
