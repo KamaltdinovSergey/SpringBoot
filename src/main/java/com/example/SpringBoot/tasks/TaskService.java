@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 
@@ -22,8 +23,13 @@ public class TaskService {
 
     private final TaskRepository taskRepository;
 
-    public TaskService(TaskRepository taskRepository){
+    private  final TaskMapper mapper;
+
+    public TaskService(TaskRepository taskRepository,
+                       TaskMapper mapper
+    ){
         this.taskRepository = taskRepository;
+        this.mapper = mapper;
         tasksMap = new HashMap<>();
         idCounter =new AtomicLong();
     }
@@ -37,7 +43,7 @@ public class TaskService {
                         "Not found task by id = " + id
                 ));
 
-        return toDomainTask(taskEntity);
+        return mapper.toDomain(taskEntity);
     }
 
     //получение всех задач
@@ -45,7 +51,7 @@ public class TaskService {
         List<TaskEntity> allEntities = taskRepository.findAll();
 
         List<Task> taskList = allEntities.stream()
-                .map(this::toDomainTask)
+                .map(mapper::toDomain)
                 .toList();
 
         return taskList;
@@ -66,17 +72,21 @@ public class TaskService {
             throw new IllegalArgumentException("Create date must be 1 day earlier than deadline date");
         }
 
-        var entityToSave = new TaskEntity(
-                null,
-                taskToCreate.creatorId(),
-                taskToCreate.assignedUserId(),
-                Status.CREATED,
-                taskToCreate.createDate(),
-                taskToCreate.deadlineDate(),
-                Priority.Low
-        );
+//        var entityToSave = new TaskEntity(
+//                null,
+//                taskToCreate.creatorId(),
+//                taskToCreate.assignedUserId(),
+//                Status.CREATED,
+//                taskToCreate.createDate(),
+//                taskToCreate.deadlineDate(),
+//                Priority.Low
+//        ); // Заменено на 2 строки кода ниже
+
+        var entityToSave = mapper.toEntity(taskToCreate);
+        entityToSave.setStatus(Status.CREATED);
+
         var savedEntity = taskRepository.save(entityToSave);
-        return toDomainTask(savedEntity);
+        return mapper.toDomain(savedEntity);
     }
 
     //обновление задачи
@@ -95,29 +105,30 @@ public class TaskService {
         if (taskEntity.getStatus() == Status.DONE){
             throw new IllegalStateException("Cannot modify task " + taskEntity.getStatus());
         }else if(taskEntity.getStatus() == Status.CREATED){
-            updateToTask = new TaskEntity(
-                    taskEntity.getId(),
-                    taskToUpdate.creatorId(),
-                    taskToUpdate.assignedUserId(),
-                    Status.CREATED,
-                    taskToUpdate.createDate(),
-                    taskToUpdate.deadlineDate(),
-                    Priority.Low
-            );
+
+            updateToTask = mapper.toEntity(taskToUpdate);
+            updateToTask.setId(taskEntity.getId());
+            updateToTask.setStatus(Status.CREATED);
+
             taskToSave = taskRepository.save(updateToTask);
         } else if(taskEntity.getStatus() == Status.IN_PROGRESS){
-            updateToTask = new TaskEntity(
-                    taskEntity.getId(),
-                    taskToUpdate.creatorId(),
-                    taskToUpdate.assignedUserId(),
-                    Status.IN_PROGRESS,
-                    taskToUpdate.createDate(),
-                    taskToUpdate.deadlineDate(),
-                    Priority.Low
-            );
+//            updateToTask = new TaskEntity(
+//                    taskEntity.getId(),
+//                    taskToUpdate.creatorId(),
+//                    taskToUpdate.assignedUserId(),
+//                    Status.IN_PROGRESS,
+//                    taskToUpdate.createDate(),
+//                    taskToUpdate.deadlineDate(),
+//                    Priority.Low
+//            ); заменено кодом 3 строки ниже
+
+            updateToTask = mapper.toEntity(taskToUpdate);
+            updateToTask.setId(taskEntity.getId());
+            updateToTask.setStatus(Status.IN_PROGRESS);
+
             taskToSave = taskRepository.save(updateToTask);
         }
-        return toDomainTask(taskToSave);
+        return mapper.toDomain(taskToSave);
     }
 
     //удаление задачи
@@ -147,7 +158,7 @@ public class TaskService {
 
         taskEntity.setStatus(Status.IN_PROGRESS);
         taskRepository.save(taskEntity);
-        return toDomainTask(taskEntity);
+        return mapper.toDomain(taskEntity);
     }
 
     //перевод в статус done
@@ -161,18 +172,7 @@ public class TaskService {
 
         taskEntity.setStatus(Status.DONE);
         taskRepository.save(taskEntity);
-        return toDomainTask(taskEntity);
+        return mapper.toDomain(taskEntity);
     }
 
-    private Task toDomainTask(TaskEntity task){
-        return new Task(
-                task.getId(),
-                task.getCreatorId(),
-                task.getAssignedUserId(),
-                task.getStatus(),
-                task.getCreateDate(),
-                task.getDeadlineDate(),
-                task.getPriority()
-        );
-    }
 }
