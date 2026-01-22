@@ -1,7 +1,5 @@
-package com.example.SpringBoot.Service;
+package com.example.SpringBoot.tasks;
 
-import com.example.SpringBoot.Entity.TaskEntity;
-import com.example.SpringBoot.Repository.TaskRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -55,15 +53,19 @@ public class TaskService {
 
     //создание задачи
     public Task createTask(Task taskToCreate) {
-        if(taskToCreate.id() != null){
-            throw new IllegalArgumentException("Id should be empty");
-        }
+//        if(taskToCreate.id() != null){
+//            throw new IllegalArgumentException("Id should be empty");
+//        } // заменено валидацией
         if(taskToCreate.status() != null){
             throw new IllegalArgumentException("Status should be empty");
         }
         if(taskToCreate.priority() != null){
             throw new IllegalArgumentException("Priority should be empty");
         }
+        if(!taskToCreate.deadlineDate().isAfter(taskToCreate.createDate())){
+            throw new IllegalArgumentException("Create date must be 1 day earlier than deadline date");
+        }
+
         var entityToSave = new TaskEntity(
                 null,
                 taskToCreate.creatorId(),
@@ -83,6 +85,10 @@ public class TaskService {
     ) {
         var taskEntity = taskRepository.findById(id)
                 .orElseThrow(()-> new EntityNotFoundException("Not found task by id = " + id));
+
+        if(!taskToUpdate.deadlineDate().isAfter(taskToUpdate.createDate())){
+            throw new IllegalArgumentException("Create date must be 1 day earlier than deadline date");
+        }
 
         TaskEntity updateToTask = null;
         TaskEntity taskToSave = null;
@@ -117,8 +123,14 @@ public class TaskService {
     //удаление задачи
     @Transactional
     public void doneTask(Long id) {
-        if(!taskRepository.existsById(id)){
-            throw new EntityNotFoundException("Not found task by id = " + id);
+
+        var task = taskRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Not found task by id = " + id));
+        if(task.getStatus().equals(Status.IN_PROGRESS)){
+            throw new IllegalStateException("Cannot done in_progress task. Contact with your supervisor");
+        }
+        if(task.getStatus().equals(Status.DONE)){
+            throw new IllegalStateException("Cannot done the task. Task was already done");
         }
         taskRepository.setStatus(id, Status.DONE);
         log.info("Successfully cancelled task: id={}",id);

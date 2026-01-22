@@ -1,7 +1,5 @@
-package com.example.SpringBoot.Entity;
+package com.example.SpringBoot.tasks;
 
-import com.example.SpringBoot.Service.Priority;
-import com.example.SpringBoot.Service.Status;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -16,24 +14,24 @@ public class TaskEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY) //автоматическая генерация id
     private Long id;
 
-    @Column(name = "creator_id")
+    @Column(name = "creator_id", nullable = false)
     private Long creatorId;
 
-    @Column(name = "assigned_user_id")
+    @Column(name = "assigned_user_id", nullable = false)
     private Long assignedUserId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status")
+    @Column(name = "status", nullable = false)
     private Status status;
 
-    @Column(name = "create_date_id")
+    @Column(name = "create_date_id", nullable = false)
     private LocalDate createDate;
 
-    @Column(name = "deadline_date")
+    @Column(name = "deadline_date", nullable = false)
     private LocalDate deadlineDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "priority")
+    @Column(name = "priority", nullable = false)
     private Priority priority;
 
     public TaskEntity(){

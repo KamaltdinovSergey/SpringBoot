@@ -1,7 +1,6 @@
-package com.example.SpringBoot.Controller;
+package com.example.SpringBoot.tasks;
 
-import com.example.SpringBoot.Service.Task;
-import com.example.SpringBoot.Service.TaskService;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -9,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 
 @RestController
@@ -41,7 +39,7 @@ public class TaskController {
 
     @PostMapping()
     public ResponseEntity<Task> createTask(
-            @RequestBody Task taskToCreate
+            @RequestBody @Valid Task taskToCreate
     ){
         log.info("Called createTask");
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -52,7 +50,7 @@ public class TaskController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateTask(
             @PathVariable("id") Long id,
-            @RequestBody Task taskToUpdate
+            @RequestBody @Valid Task taskToUpdate
     ){
         log.info("Called updateTask id={}, taskToUpdate={}", id, taskToUpdate);
         var updated = taskService.updateTask(id, taskToUpdate);
@@ -64,14 +62,9 @@ public class TaskController {
             @PathVariable("id") Long id
     ){
         log.info("Called deleteTask: id={}", id);
-        try{
             taskService.doneTask(id);
             return ResponseEntity.ok()
                     .build();
-        }catch (NoSuchElementException e){
-            return ResponseEntity.status(404)
-                    .build();
-        }
     }
     @PostMapping("/{id}/progress")
     public ResponseEntity<?> inProgressTask(

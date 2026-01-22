@@ -1,7 +1,5 @@
-package com.example.SpringBoot.Repository;
+package com.example.SpringBoot.tasks;
 
-import com.example.SpringBoot.Entity.TaskEntity;
-import com.example.SpringBoot.Service.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
