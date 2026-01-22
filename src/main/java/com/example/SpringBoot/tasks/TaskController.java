@@ -32,9 +32,22 @@ public class TaskController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<Task>> getAllTasks(){
-        log.info("getAllTask");
-        return ResponseEntity.ok(taskService.getAllTask());
+    public ResponseEntity<List<Task>> getAllTasks(
+            @RequestParam(value = "taskId", required = false) Long creatorId,
+            @RequestParam(value = "userId", required = false) Long assignedUserId,
+            @RequestParam(value = "pageSize", required = false) Integer pageSize,
+            @RequestParam(value = "pageNumber", required = false) Integer pageNumber
+    ){
+        log.info("Called getAllTask");
+        var filter = new TaskSearchFilter(
+                creatorId,
+                assignedUserId,
+                pageSize,
+                pageNumber
+        );
+        return ResponseEntity.ok(taskService.searchAllByFilter(
+                filter
+        ));
     }
 
     @PostMapping()

@@ -21,16 +21,16 @@ public interface TaskRepository extends JpaRepository<TaskEntity, Long> {
             @Param("id") Long id,
             @Param("status") Status status);
 
-//    @Query("""
-//            SELECT r.id from TaskEntity r
-//            WHERE (:taskId IS NULL OR r.taskId = :taskId)
-//            AND (:userId IS NULL OR r.userId = :userId)
-//            """)
-//    List<TaskEntity> searchAllByFilter(
-//            @Param("taskId") Long taskId,
-//            @Param("userId") Long userId,
-//            Pageable pageable
-//            //pageable - это специальный объект который говорит спрингу какую страницу
-//            // нужно выдать и сколько элементов должно быть на странице
-//    );
+    @Query("""
+            SELECT r.id from TaskEntity r
+            WHERE (:creatorId IS NULL OR r.creatorId = :creatorId)
+            AND (:assignedUserId IS NULL OR r.assignedUserId = :assignedUserId)
+            """)
+    List<TaskEntity> searchAllByFilter(
+            @Param("taskId") Long creatorId,
+            @Param("userId") Long assignedUserId,
+            Pageable pageable
+            //pageable - это специальный объект который говорит спрингу какую страницу
+            // нужно выдать и сколько элементов должно быть на странице
+    );
 }

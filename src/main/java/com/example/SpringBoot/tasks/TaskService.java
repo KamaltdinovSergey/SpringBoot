@@ -47,8 +47,22 @@ public class TaskService {
     }
 
     //получение всех задач
-    public List<Task> getAllTask(){
-        List<TaskEntity> allEntities = taskRepository.findAll();
+    public List<Task> searchAllByFilter(
+            TaskSearchFilter filter
+    ){
+        int pageSize = filter.pageSize() != null
+                ? filter.pageSize() : 10;
+        int pageNumber = filter.pageNumber() != null
+                ? filter.pageNumber() : 0;
+        var pageable = Pageable
+                .ofSize(pageSize)
+                .withPage(pageNumber);
+
+        List<TaskEntity> allEntities = taskRepository.searchAllByFilter(
+                filter.creatorId(),
+                filter.assignedUserId(),
+                pageable
+        );
 
         List<Task> taskList = allEntities.stream()
                 .map(mapper::toDomain)

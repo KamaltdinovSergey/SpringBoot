@@ -1,9 +1,9 @@
 package com.example.SpringBoot.tasks;
 
 public record TaskSearchFilter(
-        Long taskId,
+        Long creatorId,
 
-        Long userId,
+        Long assignedUserId,
 
         Integer pageSize,
 
