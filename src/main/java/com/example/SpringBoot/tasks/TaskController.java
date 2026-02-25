@@ -12,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/tasks")
-public class TaskController {
+public class TaskController { //отвечает за обработку http запросов
 
     private static final Logger log = LoggerFactory.getLogger(TaskController.class);
 
@@ -23,7 +23,7 @@ public class TaskController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Task> getTaskById(
+    public ResponseEntity<Task> getTaskById(  //ResponseEntity используется для упраления ответом сервера
             @PathVariable("id") Long id
     ) throws NoSuchFieldException {
         log.info("Called getTaskById");

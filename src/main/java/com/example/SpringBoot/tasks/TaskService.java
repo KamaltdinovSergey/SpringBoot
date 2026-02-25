@@ -12,14 +12,14 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Service
-public class TaskService {
+public class TaskService { //отвечает за бизнес логику
 
     private static Logger log = LoggerFactory.getLogger(TaskService.class);
 
     public final Map<Long, Task> tasksMap;
 
-    //обычный лонг, который корректно работает в многопотоной среде
-    private final AtomicLong idCounter;
+
+    private final AtomicLong idCounter; //обычный лонг, который корректно работает в многопотоной среде
 
     private final TaskRepository taskRepository;
 
