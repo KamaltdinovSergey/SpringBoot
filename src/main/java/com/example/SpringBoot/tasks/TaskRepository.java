@@ -36,7 +36,7 @@ public interface TaskRepository extends JpaRepository<TaskEntity, Long> { //ис
             WHERE (:creatorId IS NULL OR r.creatorId = :creatorId)
             AND (:assignedUserId IS NULL OR r.assignedUserId = :assignedUserId)
             """)
-    List<TaskEntity> searchAllByFilter(
+    List<TaskEntity> searchAllByFilter( //специальный метод для фильтра
             @Param("taskId") Long creatorId,
             @Param("userId") Long assignedUserId,
             Pageable pageable

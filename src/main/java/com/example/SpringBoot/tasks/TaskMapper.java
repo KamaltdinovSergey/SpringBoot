@@ -3,7 +3,7 @@ package com.example.SpringBoot.tasks;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TaskMapper {  //логика конвертации (перевод из доменного слоя в Entity)
+public class TaskMapper {  //спец класс для маппинга из TaskEntity в task и наоборот
 
 
     public Task toDomain(TaskEntity task){

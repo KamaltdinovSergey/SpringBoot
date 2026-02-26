@@ -18,7 +18,7 @@ public class TaskService { //отвечает за бизнес логику
 
     private final TaskRepository taskRepository; //пробразывается через конструктор как бин и подтягивания методов
 
-    private  final TaskMapper mapper;
+    private  final TaskMapper mapper; //прокидываем для создания как бин автоматически (плюс в конструктор)
 
     public TaskService(TaskRepository taskRepository,
                        TaskMapper mapper
@@ -35,13 +35,12 @@ public class TaskService { //отвечает за бизнес логику
                 .orElseThrow(()-> new EntityNotFoundException( //специальный метод который можно обернуть лямбдой orElseThrow т.к метод findById вызвращает optional
                         "Not found task by id = " + id
                 ));
-
         return mapper.toDomain(taskEntity);
     }
 
     //получение всех задач
     public List<Task> searchAllByFilter(
-            TaskSearchFilter filter
+            TaskSearchFilter filter //фильтр для пагинации
     ){
         int pageSize = filter.pageSize() != null
                 ? filter.pageSize() : 10;
@@ -60,7 +59,6 @@ public class TaskService { //отвечает за бизнес логику
         List<Task> taskList = allEntities.stream()
                 .map(mapper::toDomain)
                 .toList();
-
         return taskList;
     }
 
@@ -144,7 +142,8 @@ public class TaskService { //отвечает за бизнес логику
 
         var task = taskRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Not found task by id = " + id));
-        if(task.getStatus().equals(Status.IN_PROGRESS)){
+
+        if(task.getStatus().equals(Status.IN_PROGRESS)){ //пример валидации на уровне сервиса
             throw new IllegalStateException("Cannot done in_progress task. Contact with your supervisor");
         }
         if(task.getStatus().equals(Status.DONE)){

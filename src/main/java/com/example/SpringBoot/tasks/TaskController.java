@@ -32,14 +32,14 @@ public class TaskController { //отвечает за обработку http з
     }
 
     @GetMapping()
-    public ResponseEntity<List<Task>> getAllTasks(
+    public ResponseEntity<List<Task>> getAllTasks( //используется фильтр при вызове метода
             @RequestParam(value = "taskId", required = false) Long creatorId,
             @RequestParam(value = "userId", required = false) Long assignedUserId,
-            @RequestParam(value = "pageSize", required = false) Integer pageSize,
-            @RequestParam(value = "pageNumber", required = false) Integer pageNumber
+            @RequestParam(value = "pageSize", required = false) Integer pageSize, //для фильтра размер страницы
+            @RequestParam(value = "pageNumber", required = false) Integer pageNumber //для фильтра номер страницы
     ){
         log.info("Called getAllTask");
-        var filter = new TaskSearchFilter(
+        var filter = new TaskSearchFilter( //создаем экземпляр класа фильтра
                 creatorId,
                 assignedUserId,
                 pageSize,

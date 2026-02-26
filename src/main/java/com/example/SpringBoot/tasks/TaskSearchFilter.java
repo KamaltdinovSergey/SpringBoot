@@ -1,6 +1,6 @@
 package com.example.SpringBoot.tasks;
 
-public record TaskSearchFilter(
+public record TaskSearchFilter( //фильтр для пагинации
         Long creatorId,
 
         Long assignedUserId,
