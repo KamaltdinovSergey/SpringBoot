@@ -16,12 +16,7 @@ public class TaskService { //отвечает за бизнес логику
 
     private static Logger log = LoggerFactory.getLogger(TaskService.class);
 
-    public final Map<Long, Task> tasksMap;
-
-
-    private final AtomicLong idCounter; //обычный лонг, который корректно работает в многопотоной среде
-
-    private final TaskRepository taskRepository;
+    private final TaskRepository taskRepository; //пробразывается через конструктор как бин и подтягивания методов
 
     private  final TaskMapper mapper;
 
@@ -30,8 +25,6 @@ public class TaskService { //отвечает за бизнес логику
     ){
         this.taskRepository = taskRepository;
         this.mapper = mapper;
-        tasksMap = new HashMap<>();
-        idCounter =new AtomicLong();
     }
 
     //получение задачи по id
@@ -39,7 +32,7 @@ public class TaskService { //отвечает за бизнес логику
             Long id
     ) {
         TaskEntity taskEntity = taskRepository.findById(id)
-                .orElseThrow(()-> new EntityNotFoundException(
+                .orElseThrow(()-> new EntityNotFoundException( //специальный метод который можно обернуть лямбдой orElseThrow т.к метод findById вызвращает optional
                         "Not found task by id = " + id
                 ));
 
@@ -58,12 +51,12 @@ public class TaskService { //отвечает за бизнес логику
                 .ofSize(pageSize)
                 .withPage(pageNumber);
 
-        List<TaskEntity> allEntities = taskRepository.searchAllByFilter(
+        List<TaskEntity> allEntities = taskRepository.searchAllByFilter( //TaskEntity - сущность из БД
                 filter.creatorId(),
                 filter.assignedUserId(),
                 pageable
         );
-
+// Task - сущность бизнес логики
         List<Task> taskList = allEntities.stream()
                 .map(mapper::toDomain)
                 .toList();
@@ -116,9 +109,9 @@ public class TaskService { //отвечает за бизнес логику
 
         TaskEntity updateToTask = null;
         TaskEntity taskToSave = null;
-        if (taskEntity.getStatus() == Status.DONE){
+        if (taskEntity.getStatus() == Status.DONE) {
             throw new IllegalStateException("Cannot modify task " + taskEntity.getStatus());
-        }else if(taskEntity.getStatus() == Status.CREATED){
+        } else if (taskEntity.getStatus() == Status.CREATED){
 
             updateToTask = mapper.toEntity(taskToUpdate);
             updateToTask.setId(taskEntity.getId());
@@ -145,8 +138,8 @@ public class TaskService { //отвечает за бизнес логику
         return mapper.toDomain(taskToSave);
     }
 
-    //удаление задачи
-    @Transactional
+    //отмена задачи
+    @Transactional //аннотация, чтобы метод отмены выполнянлся в транзакции
     public void doneTask(Long id) {
 
         var task = taskRepository.findById(id)
@@ -157,7 +150,7 @@ public class TaskService { //отвечает за бизнес логику
         if(task.getStatus().equals(Status.DONE)){
             throw new IllegalStateException("Cannot done the task. Task was already done");
         }
-        taskRepository.setStatus(id, Status.DONE);
+        taskRepository.setStatus(id, Status.DONE); // метод setStatus написан в репозитории кастомным запросом через query
         log.info("Successfully cancelled task: id={}",id);
     }
 
@@ -176,7 +169,7 @@ public class TaskService { //отвечает за бизнес логику
     }
 
     //перевод в статус done
-    public Task inDoneTask(Long id) {
+    public Task inDoneTask(Long id) { //метод для преобразования сущности бд taskEntity в сущность бизнес логики Task
         var taskEntity = taskRepository.findById(id)
                 .orElseThrow(()-> new EntityNotFoundException("Not found task by id = " + id));
 

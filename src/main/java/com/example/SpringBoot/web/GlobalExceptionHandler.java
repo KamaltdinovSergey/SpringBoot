@@ -13,15 +13,16 @@ import java.time.LocalDateTime;
 
 
 @ControllerAdvice
-public class GlobalExceptionHandler {
+public class GlobalExceptionHandler { //специальный класс для обработки ошибкой (исключений) во всех имеющихся контроллерах
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    //метод на обработку все исключений
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDto> handleGenericException (Exception e) {
         log.error("Handle exception", e);
 
-        var errorDto = new ErrorResponseDto(
+        var errorDto = new ErrorResponseDto( //здесь создается экземплял класса ErrorResponseDto для передачи инфо по ошибки
                 "Internal server error",
                 e.getMessage(),
                 LocalDateTime.now()
@@ -29,9 +30,10 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(errorDto);
+                .body(errorDto); //в тело передается объект класса ErrorResponseDto
     }
 
+    //метод который обрабатывает исключения EntityNotFoundException
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErrorResponseDto> handleEntityNotFound (EntityNotFoundException e) {
         log.error("Handle entityNotFoundException", e);
@@ -46,7 +48,7 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.NOT_FOUND)
                 .body(errorDto);
     }
-
+    //метод который обрабатывает исключения IllegalArgumentException, IllegalStateException, MethodArgumentNotValidException
     @ExceptionHandler(exception = {
             IllegalArgumentException.class,
             IllegalStateException.class,

@@ -8,9 +8,18 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
+//repository приходит из стартера Data JPA с спец методами для работы с БД при наследовании от JpaRepository
+public interface TaskRepository extends JpaRepository<TaskEntity, Long> { //используется для работы с БД
 
-public interface TaskRepository extends JpaRepository<TaskEntity, Long> {
+//    примеры написания кастомных методов для запросов в бд через интерфейс repository с помощью аннотации query
+//    @Query(value = "select * from tasks r where r.status = :status", nativeQuery = true)
+//    List<TaskEntity> findAllByStatusIs(Status status);
 
+
+
+
+
+    //метод setStatus написан в репозитории кастомным запросом через query
     @Modifying
     @Query("""
             update TaskEntity r
@@ -20,6 +29,7 @@ public interface TaskRepository extends JpaRepository<TaskEntity, Long> {
     void setStatus(
             @Param("id") Long id,
             @Param("status") Status status);
+
 
     @Query("""
             SELECT r.id from TaskEntity r

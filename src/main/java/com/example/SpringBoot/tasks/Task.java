@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Null;
 import java.time.LocalDate;
 
 public record Task (
-        @Null
+        @Null //примеры валидации данных на уровне бизнес логики
         Long id,
 
         @NotNull

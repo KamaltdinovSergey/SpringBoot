@@ -7,11 +7,11 @@ import java.time.LocalDate;
 
 @Table(name = "tasks")
 @Entity
-public class TaskEntity {
+public class TaskEntity { //сущность для хабернейта, которую он сохраняет в базу данных
 
     @Id
     @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY) //автоматическая генерация id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) //автоматическая генерация id со спец стратегией (IDENTITY)
     private Long id;
 
     @Column(name = "creator_id", nullable = false)
@@ -20,7 +20,7 @@ public class TaskEntity {
     @Column(name = "assigned_user_id", nullable = false)
     private Long assignedUserId;
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.STRING)  //указываем что данные в этой строке в БД будет строка
     @Column(name = "status", nullable = false)
     private Status status;
 

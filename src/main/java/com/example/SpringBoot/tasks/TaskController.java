@@ -52,7 +52,7 @@ public class TaskController { //отвечает за обработку http з
 
     @PostMapping()
     public ResponseEntity<Task> createTask(
-            @RequestBody @Valid Task taskToCreate
+            @RequestBody @Valid Task taskToCreate //пример валидации входящего параметра через @Valid
     ){
         log.info("Called createTask");
         return ResponseEntity.status(HttpStatus.CREATED)
