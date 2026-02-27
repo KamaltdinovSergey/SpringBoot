@@ -46,15 +46,17 @@ public class TaskService { //отвечает за бизнес логику
                 ? filter.pageSize() : 10;
         int pageNumber = filter.pageNumber() != null
                 ? filter.pageNumber() : 0;
-        var pageable = Pageable
+        var pageable = Pageable                   //создание pageable через метод ofSize и withPage
                 .ofSize(pageSize)
                 .withPage(pageNumber);
 
-        List<TaskEntity> allEntities = taskRepository.searchAllByFilter( //TaskEntity - сущность из БД
+        //TaskEntity - сущность из БД
+        List<TaskEntity> allEntities = taskRepository.searchAllByFilter(
                 filter.creatorId(),
                 filter.assignedUserId(),
                 pageable
         );
+
 // Task - сущность бизнес логики
         List<Task> taskList = allEntities.stream()
                 .map(mapper::toDomain)
