@@ -43,4 +43,6 @@ public interface TaskRepository extends JpaRepository<TaskEntity, Long> { //ис
             //pageable - это специальный объект который говорит спрингу какую страницу
             // нужно выдать и сколько элементов должно быть на странице
     );
+
+    List<TaskEntity> findAllByStatus(Status status);  //пример метода который реализется автоматически
 }
