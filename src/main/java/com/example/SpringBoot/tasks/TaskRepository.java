@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 //repository приходит из стартера Data JPA с спец методами для работы с БД при наследовании от JpaRepository
 public interface TaskRepository extends JpaRepository<TaskEntity, Long> { //используется для работы с БД
@@ -22,9 +23,9 @@ public interface TaskRepository extends JpaRepository<TaskEntity, Long> { //ис
     //метод setStatus написан в репозитории кастомным запросом через query
     @Modifying
     @Query("""
-            update TaskEntity r
-            set r.status = :status
-            where r.id = :id
+            UPDATE TaskEntity r
+            SET r.status = :status
+            WHERE r.id = :id
             """)
     void setStatus(
             @Param("id") Long id,
@@ -44,5 +45,10 @@ public interface TaskRepository extends JpaRepository<TaskEntity, Long> { //ис
             // нужно выдать и сколько элементов должно быть на странице
     );
 
-    List<TaskEntity> findAllByStatus(Status status);  //пример метода который реализется автоматически
+    //пример методов которые реализутся автоматически
+    List<TaskEntity> findAllByStatus(Status status);
+
+    int countAllByStatus(Status status);
+
+    Optional<TaskEntity> findByFirstStatus(Status status);
 }
