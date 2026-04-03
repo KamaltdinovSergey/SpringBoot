@@ -1,10 +1,14 @@
 package com.example.SpringBoot.tasks;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDate;
 
-
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "tasks")
 @Entity
 public class TaskEntity { //сущность для хабернейта, которую он сохраняет в базу данных
@@ -34,79 +38,4 @@ public class TaskEntity { //сущность для хабернейта, кот
     @Column(name = "priority", nullable = false)
     private Priority priority;
 
-    public TaskEntity(){
-
-    }
-    public TaskEntity(
-            Long id,
-            Long creatorId,
-            Long assignedUserId,
-            Status status,
-            LocalDate createDate,
-            LocalDate deadlineDate,
-            Priority priority){
-        this.id=id;
-        this.creatorId = creatorId;
-        this.assignedUserId = assignedUserId;
-        this.status = status;
-        this.createDate = createDate;
-        this.deadlineDate = deadlineDate;
-        this.priority = priority;
-    }
-
-    public void setId(Long id){
-        this.id=id;
-    }
-
-    public Long getId(){
-        return id;
-    }
-
-    public Long getCreatorId() {
-        return creatorId;
-    }
-
-    public void setCreatorId(Long creatorId) {
-        this.creatorId = creatorId;
-    }
-
-    public Long getAssignedUserId() {
-        return assignedUserId;
-    }
-
-    public void setAssignedUserId(Long assignedUserId) {
-        this.assignedUserId = assignedUserId;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
-    public LocalDate getCreateDate() {
-        return createDate;
-    }
-
-    public void setCreateDate(LocalDate createDate) {
-        this.createDate = createDate;
-    }
-
-    public LocalDate getDeadlineDate() {
-        return deadlineDate;
-    }
-
-    public void setDeadlineDate(LocalDate deadlineDate) {
-        this.deadlineDate = deadlineDate;
-    }
-
-    public Priority getPriority() {
-        return priority;
-    }
-
-    public void setPriority(Priority priority) {
-        this.priority = priority;
-    }
 }

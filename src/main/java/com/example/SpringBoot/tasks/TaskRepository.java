@@ -17,9 +17,6 @@ public interface TaskRepository extends JpaRepository<TaskEntity, Long> { //ис
 //    List<TaskEntity> findAllByStatusIs(Status status);
 
 
-
-
-
     //метод setStatus написан в репозитории кастомным запросом через query
     @Modifying
     @Query("""
@@ -46,9 +43,9 @@ public interface TaskRepository extends JpaRepository<TaskEntity, Long> { //ис
     );
 
     //пример методов которые реализутся автоматически
-    List<TaskEntity> findAllByStatus(Status status);
+    //List<TaskEntity> findAllByStatus(Status status);
 
-    int countAllByStatus(Status status);
+    //int countAllByStatus(Status status);
 
-    Optional<TaskEntity> findByFirstStatus(Status status);
+    //Optional<TaskEntity> findByFirstStatus(Status status);
 }
