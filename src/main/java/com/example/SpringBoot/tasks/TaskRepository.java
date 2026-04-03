@@ -5,11 +5,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
 //repository приходит из стартера Data JPA с спец методами для работы с БД при наследовании от JpaRepository
+@Repository
 public interface TaskRepository extends JpaRepository<TaskEntity, Long> { //используется для работы с БД
 
 //    примеры написания кастомных методов для запросов в бд через интерфейс repository с помощью аннотации query
