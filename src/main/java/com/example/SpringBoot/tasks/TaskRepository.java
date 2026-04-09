@@ -32,13 +32,13 @@ public interface TaskRepository extends JpaRepository<TaskEntity, Long> { //ис
 
 
     @Query("""
-            SELECT r.id from TaskEntity r
+            SELECT r from TaskEntity r
             WHERE (:creatorId IS NULL OR r.creatorId = :creatorId)
             AND (:assignedUserId IS NULL OR r.assignedUserId = :assignedUserId)
             """)
     List<TaskEntity> searchAllByFilter( //специальный метод для фильтра
-            @Param("taskId") Long creatorId,
-            @Param("userId") Long assignedUserId,
+            @Param("creatorId") Long creatorId,
+            @Param("assignedUserId") Long assignedUserId,
             Pageable pageable
             //pageable - это специальный объект который говорит спрингу какую страницу
             // нужно выдать и сколько элементов должно быть на странице
