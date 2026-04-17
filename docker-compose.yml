@@ -3,7 +3,7 @@ version: '1.0'
 
 services:
   springTest:
-    image: 'c241f689139e'
+    image: '7c0c59ec861e'
     container_name: springTest
     expose:
       - '8080'
