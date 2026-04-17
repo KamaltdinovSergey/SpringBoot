@@ -91,6 +91,7 @@ public class TaskService { //отвечает за бизнес логику
 
         var entityToSave = mapper.toEntity(taskToCreate);
         entityToSave.setStatus(Status.CREATED);
+        entityToSave.setPriority(Priority.Low);
 
         var savedEntity = taskRepository.save(entityToSave);
         return mapper.toDomain(savedEntity);

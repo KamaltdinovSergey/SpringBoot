@@ -1,0 +1,34 @@
+version: '1.0'
+
+
+services:
+  springTest:
+    image: 'c241f689139e'
+    container_name: springTest
+    expose:
+      - '8080'
+    ports:
+      - '8080:8080'
+    environment:
+      - DB_USER=sergey
+      - DB_PASSWORD=password
+      - DB_URL=jdbc:postgresql://db:5432/postgres
+    depends_on:
+      - db
+    networks:
+      - db-network
+
+  db:
+    image: 'postgres'
+    container_name: db
+    expose:
+      - '5432'
+    environment:
+      - POSTGRES_USER=sergey
+      - POSTGRES_PASSWORD=password
+    networks:
+      - db-network
+
+networks:
+  db-network:
+    driver: bridge
